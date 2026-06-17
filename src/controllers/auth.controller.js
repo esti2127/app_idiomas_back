@@ -32,6 +32,14 @@ const getUserEmail = async(req, res) => {
 
     const verificationPassword = await verifyUserPassword(password, userEmail.password)
 
+    const {id, role} = userEmail
+    
+    //Generar el token para el usuario registrado
+
+    const userCreated = {id, role}
+
+    const token = generateToken(userCreated)
+
     if(!verificationPassword){
       return res.status(403).json({
         ok:false,
@@ -47,7 +55,8 @@ const getUserEmail = async(req, res) => {
     return res.status(200).json({
       ok:true,
       message:"user gotten by their email correctly",
-      userEmail
+      userEmail,
+      token
     })
 
 
@@ -133,6 +142,8 @@ const getUserId = async(req, res) => {
     //le pasamos ese id a la funcion que busca al usuario con ese id en la bbdd y almacenamos la respuesta en la variable userId
     const userId = await getUserById(id_user);
 
+    const token = req.token
+
     //Si el usuario con ese id no existe en la bbdd, retornamos un "error 404" y el mensaje "el usuario con el id indicado no existe en la bbdd"
     if(!userId){
       return res.status(404).json({
@@ -145,7 +156,8 @@ const getUserId = async(req, res) => {
     res.status(200).json({
       ok:true,
       message: "user gotten correctly",
-      userId
+      userId,
+      token
     })
 
   }catch(error){

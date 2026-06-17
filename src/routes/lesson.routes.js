@@ -12,6 +12,8 @@ const {getAllLessons,getLessonById,getQuestionsByLesson,createLesson,updateLesso
 //Para que cada grupo de rutas pueda estar en su propia carpeta sin tener que meter todas las rutas en el app.js
 const lessonRouter = express.Router();
 
+const validateInputs = require('../middlewares/validateInputs.js')
+
 
 const validateToken = require('../middlewares/validateToken.js')
 
@@ -27,7 +29,8 @@ lessonRouter.post('/', [validateToken,
   body('title').notEmpty().withMessage('The title is mandatory'), 
   body('level').notEmpty().withMessage('The level is mandatory'),
   body('type').isIn(['vocabulary', 'grammar', 'reading']).withMessage('The type must be vocabulary, grammar or reading'),
-  body('is_published').isBoolean().withMessage('The published field must be true or false')/* , validateInputs */
+  body('is_published').isBoolean().withMessage('The published field must be true or false'),
+  validateInputs
   ], createLesson)
 lessonRouter.put('/:id', [validateToken/* , validateRole('admin', 'user') */], updateLesson)
 lessonRouter.delete('/:id', [validateToken/* , validateRole('admin', 'user') */], deleteLesson)

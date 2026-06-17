@@ -10,12 +10,14 @@ const getAllLessons = async (req, res) => {
     //await por el retardo
     const lessons = await getLessonsFromDB();
 
+    const token = req.token
     //no tenemos en cuenta el caso "error 404" porque realmente podría ser que la bbdd estuviese vacía y entonces nos devolviese un array vacío, y eso no indicaría que hubiese un error.
     //En caso de que todo vaya bien mostramos en un código de respuesta satisfactoria 200, el mensaje "All lessons gotten" y las lecciones que devuelva la bbdd al hacer la consulta
     return res.status(200).json({
       ok: true,
       message: "All lessons gotten",
-      lessons
+      lessons, 
+      token
     })
 
   } catch (error) {
@@ -56,11 +58,14 @@ const getLessonById = async (req, res) => {
       });
     }
 
+    const token = req.token
+
     //devuelve un código de respuesta 200 en formato json con el mensaje "Lesson by id gotten"
-    res.status(200).json({
+    return res.status(200).json({
       ok: true,
       message: "Lesson by id gotten",
-      lessonId
+      lessonId,
+      token
     })
 
     //Si el error es del servidor porque la conexión ha fallado...
@@ -131,17 +136,20 @@ const createLesson = async(req, res) => {
     //Llamamos a createLessonfromDB pasándole los argumentos, esperamos su resultado con await, y guardamos lo que devuelve en createLessonInDB
     const createLessonInDB = await createLessonfromDB(id_lesson ,title, level, type, is_published)
 
+    const token = req.token
+
     //Si todo va bien...
     return res.status(200).json({
       ok:true,
       message:"lesson created successfully",
-      createLessonInDB
+      createLessonInDB,
+      token
     })
 
     //Si ha habido un error del servidor...
   }catch(error){
     console.log(error)
-    res.status(500).json({
+    return res.status(500).json({
       ok:false,
       message:"Server error"
     })
@@ -173,10 +181,13 @@ const updateLesson = async(req, res) => {
       })
     }
 
+    const token = req.token
+
     return res.status(200).json({
       ok:true,
       message:"Lesson updated successfully",
-      updatedLessonInDB
+      updatedLessonInDB,
+      token
 
     })
     
@@ -211,9 +222,12 @@ const deleteLesson = async(req, res) => {
       })
     }
 
+    const token = req.token
+
     return res.status(200).json({
       ok:true,
-      message: "lesson deleted from database successfully"
+      message: "lesson deleted from database successfully",
+      token
     })
 
   }catch(error){
@@ -223,10 +237,7 @@ const deleteLesson = async(req, res) => {
       ok:false,
       message:"Server error"
     })
-
   }
-
-
 }
 
 
