@@ -117,7 +117,6 @@ const createUserInDB = async(req, res) => {
     })
 
 
-
   }catch(error){
 
     //le mostramos el error al admin.
@@ -132,53 +131,11 @@ const createUserInDB = async(req, res) => {
   }
 }
 
-const getUserId = async(req, res) => {
-
-  try{
-
-    //Recogemos de la URL del login el id del usuario 
-    const {id_user} = req.params
-
-    //le pasamos ese id a la funcion que busca al usuario con ese id en la bbdd y almacenamos la respuesta en la variable userId
-    const userId = await getUserById(id_user);
-
-    const token = req.token
-
-    //Si el usuario con ese id no existe en la bbdd, retornamos un "error 404" y el mensaje "el usuario con el id indicado no existe en la bbdd"
-    if(!userId){
-      return res.status(404).json({
-        ok:false,
-        message: "user not found"
-      })
-    }
-
-    //Si el usuario con ese id existe en la bbdd devolvemos un estado de respuesta 200 para indicar que todo ha ido bien, el mensaje "usuario encontrado" y el usuario con ese id 
-    res.status(200).json({
-      ok:true,
-      message: "user gotten correctly",
-      userId,
-      token
-    })
-
-  }catch(error){
-
-    //en caso de que haya habido un error de conexion, le mostramos el error al administrador
-    console.log(error);
-
-    //y devolvemos el "error 500" con el mensaje "error de servidor"
-    return res.status(500).json({
-      ok:false,
-      message:"Server error"
-    })
-
-  }
-}
 
 //exportamos las funciones creadas para poder usarlas en otros archivos 
 module.exports = {
 
   getUserEmail,
-  createUserInDB,
-  getUserId
+  createUserInDB
 
 }

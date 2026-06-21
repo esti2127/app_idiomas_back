@@ -66,24 +66,12 @@ const generateUserPassword = async (password) => {
         //le mandamos el error al controlador 
         throw error
     }
-
     
 }
 
 
-const getUserById = async (id_user) => {
-
-    const result = await pool.query(selectUserId, [id_user])
-    // console.log(result.rows)
-
-    //rows[0] para que en lugar de devolver el array con el objeto encontrado, devuelva directamente el objeto sin el array. 
-    //PROBAR QUE DEVOLVERÍA SI HACEMOS UNA CONSULTA A UN USUARIO CON UN ID QUE NO EXISTE EN LA BASE DE DATOS: NULL O UNDEFINED?
-    return result.rows[0]
-}
-
 module.exports = {
     getUserByEmail,
     createUser,
-    getUserById,
     verifyUserPassword
 }

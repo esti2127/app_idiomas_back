@@ -49,6 +49,12 @@ ALTER TABLE lessons
 
 
 
+UPDATE lessons 
+SET level = 'B1' 
+WHERE id_lesson = 5;
+
+
+
 
 
 
@@ -57,7 +63,6 @@ CREATE TABLE questions (
     id_lesson INTEGER NOT NULL,
     question_text TEXT NOT NULL,
     type VARCHAR(20) NOT NULL CHECK (type IN ('Fill in the blank', 'multiple choice')), 
-    order_index INTEGER NOT NULL DEFAULT 1,
     CONSTRAINT fk_questions_lesson
     FOREIGN KEY (id_lesson) REFERENCES lessons(id_lesson) ON DELETE CASCADE
 );
@@ -72,6 +77,10 @@ UPDATE questions SET type = 'multiple choice' WHERE type = 'aukera-desberdinak';
 ALTER TABLE questions 
     ADD CONSTRAINT questions_type_check 
     CHECK (type IN ('Fill in the blank', 'multiple choice'));
+
+
+DELETE FROM questions 
+WHERE id_question = 15;
 
 
 

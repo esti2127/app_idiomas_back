@@ -1,9 +1,12 @@
 const {validationResult} = require ('express-validator');
 
+// Indica "qué requisitos" debe cumplir la petición para ser atendida.
 const validateInputs = (req, res, next) => {
 
+  //Buscamos si ha habido algún error en la validación
   const errors = validationResult(req);
 
+  //Si ha habido algún error, retornamos un "error 400" y el array con los errores
   if(!errors.isEmpty()){
     return res.status(400).json({
       ok:false,
