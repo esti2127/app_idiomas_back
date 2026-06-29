@@ -61,11 +61,29 @@ WHERE id_lesson = 5;
 CREATE TABLE questions (
     id_question SERIAL PRIMARY KEY,
     id_lesson INTEGER NOT NULL,
+    lesson_number INTEGER,
     question_text TEXT NOT NULL,
-    type VARCHAR(20) NOT NULL CHECK (type IN ('Fill in the blank', 'multiple choice')), 
+    type VARCHAR(20) NOT NULL CHECK (type IN ('Fill in the blank', 'multiple choice')),
     CONSTRAINT fk_questions_lesson
     FOREIGN KEY (id_lesson) REFERENCES lessons(id_lesson) ON DELETE CASCADE
 );
+
+
+ALTER TABLE questions ADD COLUMN lesson_number INTEGER;
+
+UPDATE questions 
+SET lesson_number = subq.rn
+FROM (
+  SELECT id_question, 
+         ROW_NUMBER() OVER (
+           PARTITION BY id_lesson 
+           ORDER BY id_question
+         ) AS rn
+  FROM questions
+) subq
+WHERE questions.id_question = subq.id_question
+
+ALTER TABLE questions ALTER COLUMN lesson_number SET NOT NULL;
 
 
 ALTER TABLE questions 
@@ -116,6 +134,20 @@ CREATE TABLE answers (
 	CONSTRAINT fk_answers_question
 	FOREIGN KEY (id_question) REFERENCES questions(id_question) ON DELETE CASCADE
 );
+
+
+
+
+SELECT lessons.*, questions.id_question, questions.question_text, questions.type AS question_type, 
+  answers.id_answer, answers.answer_text, answers.is_correct
+  FROM lessons 
+  LEFT JOIN questions ON lessons.id_lesson = questions.id_lesson 
+  LEFT JOIN answers ON questions.id_question = answers.id_question
+  WHERE lessons.id_lesson = 5 
+  ORDER BY lessons.id_lesson, questions.id_question, answers.id_answer 
+
+
+
 
 
 

@@ -35,7 +35,7 @@ pool.on('connect', () => {
 
 pool.on('error', (error) => {
 
-    console.error('Error crítico en la Pool de lecciones:', error.message);
+    console.error('Error en la pool:', error.message);
 
 });
 

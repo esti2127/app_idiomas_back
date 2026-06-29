@@ -1,5 +1,5 @@
 
-const { getLessonsFromDB, getLessonByIdFromDB, createQuestionfromDB, getQuestionsFromDB, createLessonfromDB, updateLessonfromDB, deleteLessonfromDB, createAnswerfromDB, updateQuestionfromDB, deleteQuestionfromDB, updateAnswerfromDB, deleteAnswerfromDB, getQuestionsWithAnswersFromDB, getLessonsWithQuestionsAndAnswersfromDB  } = require('../models/lesson.model')
+const { getLessonsFromDB, getLessonByIdFromDB, createQuestionfromDB, getQuestionsFromDB, createLessonfromDB, updateLessonfromDB, deleteLessonfromDB, createAnswerfromDB, updateQuestionfromDB, deleteQuestionfromDB, updateAnswerfromDB, deleteAnswerfromDB, getQuestionsWithAnswersFromDB, getLessonsWithQuestionsAndAnswersfromDB, getQuestionsNumberById, getTypes, getQuestionsByTypeAndId } = require('../models/lesson.model')
 
 
 //usamos una función asincrona porque realizar una consulta a la bbdd tiene retardo
@@ -16,7 +16,7 @@ const getAllLessons = async (req, res) => {
     return res.status(200).json({
       ok: true,
       message: "All lessons gotten",
-      lessons, 
+      lessons,
       token
     })
 
@@ -43,7 +43,7 @@ const getLessonById = async (req, res) => {
     //hacemos la consulta a la bbdd para que nos devuleva la leccion según su id 
     //await porque hay retardo
 
-    const {id} = req.params
+    const { id } = req.params
 
     const lessonId = await getLessonByIdFromDB(id);
 
@@ -84,32 +84,32 @@ const getLessonById = async (req, res) => {
 
 
 
-const createQuestion = async(req, res) => {
+const createQuestion = async (req, res) => {
 
-  try{
+  try {
 
     //del body requerimos los siguientes argumentos que hemos desestructurado para poder escribirlo todo en una línea de manera más limpia
-    const {id_question, id_lesson, question_text, type} = req.body;
+    const { id_question, id_lesson, question_text, type, lesson_number } = req.body;
 
     //Llamamos a createLessonfromDB pasándole los argumentos, esperamos su resultado con await, y guardamos lo que devuelve en createLessonInDB
-    const createQuestionInDB = await createQuestionfromDB(id_question, id_lesson, question_text, type)
+    const createQuestionInDB = await createQuestionfromDB(id_question, id_lesson, question_text, type, lesson_number)
 
     const token = req.token
 
     //Si todo va bien...
     return res.status(200).json({
-      ok:true,
-      message:"question created successfully",
+      ok: true,
+      message: "question created successfully",
       createQuestionInDB,
       token
     })
 
     //Si ha habido un error del servidor...
-  }catch(error){
+  } catch (error) {
     console.log(error)
     return res.status(500).json({
-      ok:false,
-      message:"Server error"
+      ok: false,
+      message: "Server error"
     })
   }
 
@@ -118,24 +118,24 @@ const createQuestion = async(req, res) => {
 
 
 
-const updateQuestion = async(req, res) => {
+const updateQuestion = async (req, res) => {
 
   try {
 
     //necesitamos el parámetro id que recogemos de la URL para que la BBDD sepa que leccion tiene que actualizar
-    const {id} = req.params;
+    const { id } = req.params;
     //del body del objeto desestructuramos las propiedades que necesitamos para que la BBDD sepa con que valores tiene que actualizar la lección
-    const { id_lesson, question_text, type } = req.body;
+    const { id_lesson, question_text, type, lesson_number } = req.body;
 
     //Llamamos a updateLessonfromDB pasándole los argumentos, esperamos su resultado con await, y guardamos lo que devuelve en updatedLessonInDB
-    const updatedQuestionInDB = await updateQuestionfromDB(id, id_lesson, question_text, type)
+    const updatedQuestionInDB = await updateQuestionfromDB(id, id_lesson, question_text, type, lesson_number)
 
 
     //null, undefined
     //Si resulta que la leccion no está en la bbdd...
-    if(!updatedQuestionInDB){
+    if (!updatedQuestionInDB) {
       return res.status(404).json({
-        ok:false,
+        ok: false,
         message: "Question not found in database"
       })
     }
@@ -143,18 +143,18 @@ const updateQuestion = async(req, res) => {
     const token = req.token
 
     return res.status(200).json({
-      ok:true,
-      message:"Question updated successfully",
+      ok: true,
+      message: "Question updated successfully",
       updatedQuestionInDB,
       token
 
     })
-    
-  }catch(error){
+
+  } catch (error) {
     console.log(error)
     res.status(500).json({
-      ok:false,
-      message:"Server error"
+      ok: false,
+      message: "Server error"
     })
 
   }
@@ -164,38 +164,38 @@ const updateQuestion = async(req, res) => {
 
 
 
-const deleteQuestion = async(req, res) => {
+const deleteQuestion = async (req, res) => {
 
-  try{
+  try {
 
     //renombramos el id que hemos desestructurado de la URL
-    const {id: questionId} = req.params;
+    const { id: questionId } = req.params;
 
     //Llamamos a deleteLessonfromDB y le pasamos el argumento de lessonId para que la BBDD sepa que lesson se tiene que eliminar 
     const result = await deleteQuestionfromDB(questionId);
 
     //Aqui usamos result == 0 porque en el modelo usamos rowCount y nos devuelve un numero. Si ese numero es 0, no hay fila
-    if(result == 0){
+    if (result == 0) {
       return res.status(404).json({
-        ok:false,
-        message:"question in database not found"
+        ok: false,
+        message: "question in database not found"
       })
     }
 
     const token = req.token
 
     return res.status(200).json({
-      ok:true,
+      ok: true,
       message: "question deleted from database successfully",
       token
     })
 
-  }catch(error){
+  } catch (error) {
 
     console.log(error)
     res.status(500).json({
-      ok:false,
-      message:"Server error"
+      ok: false,
+      message: "Server error"
     })
   }
 }
@@ -203,12 +203,12 @@ const deleteQuestion = async(req, res) => {
 
 
 
-const createAnswer = async(req, res) => {
+const createAnswer = async (req, res) => {
 
-  try{
+  try {
 
     //del body requerimos los siguientes argumentos que hemos desestructurado para poder escribirlo todo en una línea de manera más limpia
-    const {id_question, answer_text, is_correct} = req.body;
+    const { id_question, answer_text, is_correct } = req.body;
 
     //Llamamos a createLessonfromDB pasándole los argumentos, esperamos su resultado con await, y guardamos lo que devuelve en createLessonInDB
     const createAnswerInDB = await createAnswerfromDB(id_question, answer_text, is_correct)
@@ -217,18 +217,18 @@ const createAnswer = async(req, res) => {
 
     //Si todo va bien...
     return res.status(200).json({
-      ok:true,
-      message:"question created successfully",
+      ok: true,
+      message: "question created successfully",
       createAnswerInDB,
       token
     })
 
     //Si ha habido un error del servidor...
-  }catch(error){
+  } catch (error) {
     console.log(error)
     return res.status(500).json({
-      ok:false,
-      message:"Server error"
+      ok: false,
+      message: "Server error"
     })
   }
 
@@ -238,14 +238,14 @@ const createAnswer = async(req, res) => {
 
 
 
-const updateAnswer = async(req, res) => {
+const updateAnswer = async (req, res) => {
 
   try {
 
     //necesitamos el parámetro id que recogemos de la URL para que la BBDD sepa que leccion tiene que actualizar
-    const {id} = req.params;
+    const { id } = req.params;
     //del body del objeto desestructuramos las propiedades que necesitamos para que la BBDD sepa con que valores tiene que actualizar la lección
-    const {id_question, answer_text, is_correct} = req.body;
+    const { id_question, answer_text, is_correct } = req.body;
 
     //Llamamos a updateLessonfromDB pasándole los argumentos, esperamos su resultado con await, y guardamos lo que devuelve en updatedLessonInDB
     const updatedAnswerInDB = await updateAnswerfromDB(id, id_question, answer_text, is_correct)
@@ -253,9 +253,9 @@ const updateAnswer = async(req, res) => {
 
     //null, undefined
     //Si resulta que la leccion no está en la bbdd...
-    if(!updatedAnswerInDB){
+    if (!updatedAnswerInDB) {
       return res.status(404).json({
-        ok:false,
+        ok: false,
         message: "Answer not found in database"
       })
     }
@@ -263,18 +263,18 @@ const updateAnswer = async(req, res) => {
     const token = req.token
 
     return res.status(200).json({
-      ok:true,
-      message:"Answer updated successfully",
+      ok: true,
+      message: "Answer updated successfully",
       updatedAnswerInDB,
       token
 
     })
-    
-  }catch(error){
+
+  } catch (error) {
     console.log(error)
     res.status(500).json({
-      ok:false,
-      message:"Server error"
+      ok: false,
+      message: "Server error"
     })
 
   }
@@ -284,38 +284,38 @@ const updateAnswer = async(req, res) => {
 
 
 
-const deleteAnswer = async(req, res) => {
+const deleteAnswer = async (req, res) => {
 
-  try{
+  try {
 
     //renombramos el id que hemos desestructurado de la URL
-    const {id: answerId} = req.params;
+    const { id: answerId } = req.params;
 
     //Llamamos a deleteLessonfromDB y le pasamos el argumento de lessonId para que la BBDD sepa que lesson se tiene que eliminar 
     const result = await deleteAnswerfromDB(answerId);
 
     //Aqui usamos result == 0 porque en el modelo usamos rowCount y nos devuelve un numero. Si ese numero es 0, no hay fila
-    if(result == 0){
+    if (result == 0) {
       return res.status(404).json({
-        ok:false,
-        message:"answer in database not found"
+        ok: false,
+        message: "answer in database not found"
       })
     }
 
     const token = req.token
 
     return res.status(200).json({
-      ok:true,
+      ok: true,
       message: "answer deleted from database successfully",
       token
     })
 
-  }catch(error){
+  } catch (error) {
 
     console.log(error)
     res.status(500).json({
-      ok:false,
-      message:"Server error"
+      ok: false,
+      message: "Server error"
     })
   }
 }
@@ -323,40 +323,47 @@ const deleteAnswer = async(req, res) => {
 
 
 
-const getQuestionsWithAnswers = async(req, res) => {
+const getQuestionsWithAnswers = async (req, res) => {
 
 
-  try{
-
-    //luego recoger preguntas por leccion
+  try {
 
     //el parámetro requerido para hacer la consulta es el id, en este caso
-     const {id} = req.params
-    
+    const { id } = req.params
+    const { type } = req.query
+
     //Llamamos a la función que se encarga de hacer la consulta y como tiene retardo le ponemos el await delante
-    const questions = await getQuestionsWithAnswersFromDB(id)
+    const questionsWithAnswers = await getQuestionsWithAnswersFromDB(id, type || null)
 
     //Aquí si tiene sentido length porque queremos que nos devuelva todas las preguntas en un array.
-    if(questions.length == 0){
-      //devolvemos un "error 404" en caso de que las preguntas no existan y el mensaje "question not found"
-      return res.status(404).json({
-        ok:false,
-        message: "question with answers not found"
+    // if (questionsWithAnswers.length == 0) {
+    //   //devolvemos un "error 404" en caso de que las preguntas no existan y el mensaje "question not found"
+    //   return res.status(404).json({
+    //     ok: false,
+    //     message: "question with answers not found"
+    //   })
+    // }
+    if (questionsWithAnswers.length == 0) {
+      return res.status(200).json({
+        ok: true,
+        message: "No questions found",
+        questionsWithAnswers: []
       })
     }
 
+
     //Si todo va bien el estado de la respuesta será el código de respuesta 200 en formato json con el mensaje "Question gotten correctly"
     return res.status(200).json({
-      ok:true,
+      ok: true,
       message: "Question with answers gotten correctly",
-      questions
+      questionsWithAnswers
     });
 
     //En caso de que la conexión haya fallado y haya un error del servidor mostramos el "error 500" y el mensaje "Server error"
-  }catch(error){
+  } catch (error) {
     console.log(error)
     return res.status(500).json({
-      ok:false,
+      ok: false,
       message: "Server error"
     })
   }
@@ -368,27 +375,32 @@ const getQuestionsWithAnswers = async(req, res) => {
 
 const getLessonsWithQuestionsAndAnswers = async (req, res) => {
   try {
-    
-    const lessons = await getLessonsWithQuestionsAndAnswersfromDB();
 
-   
+    const { id } = req.params
+    const lessons = await getLessonsWithQuestionsAndAnswersfromDB(id);
+
+    console.log(id)
+
+    console.log(lessons)
+
+
     if (lessons.length === 0) {
-      
+
       return res.status(404).json({
         ok: false,
         message: "No lessons found in the database"
       });
     }
 
-    
+
     return res.status(200).json({
       ok: true,
       message: "Lessons with questions and answers gotten correctly",
-      lessons  
+      lessons
     });
 
   } catch (error) {
-    
+
     console.log(error);
     return res.status(500).json({
       ok: false,
@@ -402,40 +414,40 @@ const getLessonsWithQuestionsAndAnswers = async (req, res) => {
 
 
 //recogemos las preguntas según la lección 
-const getQuestionsByLesson = async(req, res) => {
+const getQuestionsByLesson = async (req, res) => {
 
 
-  try{
+  try {
 
     //luego recoger preguntas por leccion
 
     //el parámetro requerido para hacer la consulta es el id, en este caso
-     const {id} = req.params
-    
+    const { id } = req.params
+
     //Llamamos a la función que se encarga de hacer la consulta y como tiene retardo le ponemos el await delante
     const questions = await getQuestionsFromDB(id)
 
     //Aquí si tiene sentido length porque queremos que nos devuelva todas las preguntas en un array.
-    if(questions.length == 0){
+    if (questions.length == 0) {
       //devolvemos un "error 404" en caso de que las preguntas no existan y el mensaje "question not found"
       return res.status(404).json({
-        ok:false,
+        ok: false,
         message: "question not found"
       })
     }
 
     //Si todo va bien el estado de la respuesta será el código de respuesta 200 en formato json con el mensaje "Question gotten correctly"
     return res.status(200).json({
-      ok:true,
+      ok: true,
       message: "Question gotten correctly",
       questions
     });
 
     //En caso de que la conexión haya fallado y haya un error del servidor mostramos el "error 500" y el mensaje "Server error"
-  }catch(error){
+  } catch (error) {
     console.log(error)
     return res.status(500).json({
-      ok:false,
+      ok: false,
       message: "Server error"
     })
   }
@@ -444,32 +456,32 @@ const getQuestionsByLesson = async(req, res) => {
 
 
 
-const createLesson = async(req, res) => {
+const createLesson = async (req, res) => {
 
-  try{
+  try {
 
     //del body requerimos los siguientes argumentos que hemos desestructurado para poder escribirlo todo en una línea de manera más limpia
-    const {id_lesson, title, level, type, is_published} = req.body;
+    const { id_lesson, title, level, type, is_published } = req.body;
 
     //Llamamos a createLessonfromDB pasándole los argumentos, esperamos su resultado con await, y guardamos lo que devuelve en createLessonInDB
-    const createLessonInDB = await createLessonfromDB(id_lesson ,title, level, type, is_published)
+    const createLessonInDB = await createLessonfromDB(id_lesson, title, level, type, is_published)
 
     const token = req.token
 
     //Si todo va bien...
     return res.status(200).json({
-      ok:true,
-      message:"lesson created successfully",
+      ok: true,
+      message: "lesson created successfully",
       createLessonInDB,
       token
     })
 
     //Si ha habido un error del servidor...
-  }catch(error){
+  } catch (error) {
     console.log(error)
     return res.status(500).json({
-      ok:false,
-      message:"Server error"
+      ok: false,
+      message: "Server error"
     })
   }
 
@@ -477,24 +489,24 @@ const createLesson = async(req, res) => {
 
 
 //Función asincrona que se encarga de recibir la petición de la bbdd, extraer los datos de params y body, llamar al modelo, gestionar la respuesta del modelo y devolverle la respuesta al cliente
-const updateLesson = async(req, res) => {
+const updateLesson = async (req, res) => {
 
   try {
 
     //necesitamos el parámetro id que recogemos de la URL para que la BBDD sepa que leccion tiene que actualizar
-    const {id} = req.params;
+    const { id } = req.params;
     //del body del objeto desestructuramos las propiedades que necesitamos para que la BBDD sepa con que valores tiene que actualizar la lección
-    const {title, level, type, is_published} = req.body;
+    const { title, level, type, is_published } = req.body;
 
     //Llamamos a updateLessonfromDB pasándole los argumentos, esperamos su resultado con await, y guardamos lo que devuelve en updatedLessonInDB
-    const updatedLessonInDB = await updateLessonfromDB(id ,title, level, type, is_published)
+    const updatedLessonInDB = await updateLessonfromDB(id, title, level, type, is_published)
 
 
     //null, undefined
     //Si resulta que la leccion no está en la bbdd...
-    if(!updatedLessonInDB){
+    if (!updatedLessonInDB) {
       return res.status(404).json({
-        ok:false,
+        ok: false,
         message: "Lesson not found in database"
       })
     }
@@ -502,18 +514,18 @@ const updateLesson = async(req, res) => {
     const token = req.token
 
     return res.status(200).json({
-      ok:true,
-      message:"Lesson updated successfully",
+      ok: true,
+      message: "Lesson updated successfully",
       updatedLessonInDB,
       token
 
     })
-    
-  }catch(error){
+
+  } catch (error) {
     console.log(error)
     res.status(500).json({
-      ok:false,
-      message:"Server error"
+      ok: false,
+      message: "Server error"
     })
 
   }
@@ -522,39 +534,92 @@ const updateLesson = async(req, res) => {
 
 
 
-const deleteLesson = async(req, res) => {
+const deleteLesson = async (req, res) => {
 
-  try{
+  try {
 
     //renombramos el id que hemos desestructurado de la URL
-    const {id: lessonId} = req.params;
+    const { id: lessonId } = req.params;
 
     //Llamamos a deleteLessonfromDB y le pasamos el argumento de lessonId para que la BBDD sepa que lesson se tiene que eliminar 
     const result = await deleteLessonfromDB(lessonId);
 
     //Aqui usamos result == 0 porque en el modelo usamos rowCount y nos devuelve un numero. Si ese numero es 0, no hay fila
-    if(result == 0){
+    if (result == 0) {
       return res.status(404).json({
-        ok:false,
-        message:"lesson in database not found"
+        ok: false,
+        message: "lesson in database not found"
       })
     }
 
     const token = req.token
 
     return res.status(200).json({
-      ok:true,
+      ok: true,
       message: "lesson deleted from database successfully",
       token
     })
 
-  }catch(error){
+  } catch (error) {
 
     console.log(error)
     res.status(500).json({
-      ok:false,
-      message:"Server error"
+      ok: false,
+      message: "Server error"
     })
+  }
+}
+
+
+
+const getQuestionsByTypeAndIdfromDB = async (req, res) => {
+  try {
+
+    const { id } = req.params
+
+    const { type } = req.query
+
+    const types = await getTypes()
+
+    const questionsWithAnswers = await getQuestionsWithAnswersFromDB(id, type);
+
+    const countResult = await getQuestionsNumberById(id);
+    const totalQuestions = Number.parseInt(countResult[0]?.count, 10) || 0;
+
+    if (!types || types.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: "Question types not found"
+      })
+    } else {
+
+      const questionsByType = types.map((typeObj) => {
+        const typeName = typeObj.type;
+
+        return {
+          type: typeName,
+          questions: questionsWithAnswers.filter(
+            (question) => question.type === typeName
+          )
+        };
+      });
+
+      return res.status(200).json({
+        ok: true,
+        message: "questions gotten correctly",
+        questionsByType,
+        totalQuestions
+      })
+    }
+
+  } catch (error) {
+    console.log(error)
+
+    return res.status(500).json({
+      ok: false,
+      message: "Server error"
+    })
+
   }
 }
 
@@ -573,5 +638,6 @@ module.exports = {
   updateAnswer,
   deleteAnswer,
   getQuestionsWithAnswers,
-  getLessonsWithQuestionsAndAnswers
+  getLessonsWithQuestionsAndAnswers,
+  getQuestionsByTypeAndIdfromDB
 }

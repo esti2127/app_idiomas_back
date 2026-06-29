@@ -32,6 +32,13 @@ const getUserEmail = async(req, res) => {
 
     const verificationPassword = await verifyUserPassword(password, userEmail.password)
 
+     if(!verificationPassword){
+      return res.status(403).json({
+        ok:false,
+        message:"invalid credentials"
+      })
+    }
+
     const {id, role} = userEmail
     
     //Generar el token para el usuario registrado
@@ -40,12 +47,6 @@ const getUserEmail = async(req, res) => {
 
     const token = generateToken(userCreated)
 
-    if(!verificationPassword){
-      return res.status(403).json({
-        ok:false,
-        message:"invalid credentials"
-      })
-    }
 
     // console.log(verificationPassword)
 
